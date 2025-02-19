@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全网视频下载器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 10px;
+            margin: 40px 0;
+        }
+        #videoUrl {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #downloadBtn {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        @media (max-width: 480px) {
+            .container {
+                flex-direction: column;
+            }
+            #downloadBtn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>全网视频下载器</h1>
+    <div class="container">
+        <input type="url" id="videoUrl" placeholder="输入视频链接（支持抖音、快手等）">
+        <button id="downloadBtn">下载视频</button>
+    </div>
+
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const url = document.getElementById('videoUrl').value;
+            if (!url) return alert('请输入视频链接');
+
+            try {
+                const btn = document.getElementById('downloadBtn');
+                btn.disabled = true;
+                btn.textContent = '解析中...';
+                
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const result = await response.json();
+                if (result.downloadUrl) {
+                    const a = document.createElement('a');
+                    a.href = result.downloadUrl;
+                    a.download = 'video.mp4';
+                    a.click();
+                } else {
+                    alert('下载失败：' + (result.error || '未知错误'));
+                }
+            } catch (error) {
+                alert('请求失败，请检查网络');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '下载视频';
+            }
+        });
+    </script>
+</body>
+<script src="js/video.js"></script>
+</html>
